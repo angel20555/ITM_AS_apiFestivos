@@ -52,6 +52,7 @@ ScaffoldingReadMe.txt
 
 # Auto-generated VS Code files
 .vscode/
+.vs/
 
 # ASP.NET Core
 project.lock.json

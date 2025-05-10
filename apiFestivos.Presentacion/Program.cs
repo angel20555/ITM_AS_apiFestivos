@@ -7,7 +7,7 @@ var configuration = builder.Configuration;
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("PoliticaCors", builder =>
+    options.AddPolicy("PermitirTodo", builder =>
     {
         builder.AllowAnyOrigin()
                .AllowAnyMethod()
@@ -38,7 +38,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors("PoliticaCors");
+app.UseCors("PermitirTodo");
 
 app.MapGet("/", context =>
 {
