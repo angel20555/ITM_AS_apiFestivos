@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
@@ -26,7 +26,7 @@ namespace apiFestivos.Test
         public async Task ObtenerFestivo_Tipo1_DeberiaRetornarFechaFija()
         {
             // ARRANGE
-            var a�o = 2025;
+            var año = 2025;
             var festivoFijo = new Festivo
             {
                 Nombre = "La Independencia ",
@@ -39,7 +39,7 @@ namespace apiFestivos.Test
             FestivosRepositorioMock.Setup(festivos => festivos.ObtenerTodos()).ReturnsAsync(new[] { festivoFijo });
 
             // ACT
-            var resultado = await _service.ObtenerA�o(a�o);
+            var resultado = await _service.ObtenerAño(año);
             var primeraFecha = resultado.First().Fecha;
 
             // ASSERT
@@ -51,10 +51,10 @@ namespace apiFestivos.Test
         public async Task ObtenerFestivo_Tipo2_DeberiaMoverseAlSiguienteLunes()
         {
             // ARRANGE
-            var a�o = 2025;
+            var año = 2025;
             var festivoMovible = new Festivo
             {
-                Nombre = "San Jos�",
+                Nombre = "San José",
                 Dia = 19,
                 Mes = 3,
                 IdTipo = 2, // Tipo 2: Ley Puente
@@ -63,12 +63,91 @@ namespace apiFestivos.Test
             FestivosRepositorioMock.Setup(f => f.ObtenerTodos()).ReturnsAsync(new[] { festivoMovible });
 
             // ACT
-            var resultado = await _service.ObtenerA�o(a�o);
+            var resultado = await _service.ObtenerAño(año);
             var fechaCalculada = resultado.First().Fecha;
 
             // ASSERT
-            // 19 de marzo de 2025 es mi�rcoles osea lunes siguiente es 24 de marzo de 2025
+            // 19 de marzo de 2025 es miércoles osea lunes siguiente es 24 de marzo de 2025
             Assert.Equal(new DateTime(2025, 3, 24), fechaCalculada);
         }
+
+        [Fact]
+
+        public async Task ObtenerFestivo_Tipo4_DeberiaMoverseAlSiguienteLunes()
+        {
+            // ARRANGE
+            int año = 2025;
+            // Domingo de Pascua 2025: 20 de abril
+            // +7 días = 27 de abril (domingo) → siguiente lunes = 28 abril
+
+            var festivoTipo4 = new Festivo
+            {
+                Nombre = "Festivo tipo 4 de prueba",
+                IdTipo = 4,
+                DiasPascua = 9
+            };
+
+            FestivosRepositorioMock.Setup(repo => repo.ObtenerTodos()).ReturnsAsync(new[] { festivoTipo4 });
+
+            // ACT
+            var resultado = await _service.ObtenerAño(año);
+            var fechaFestivo = resultado.FirstOrDefault();
+
+            // ASSERT
+            Assert.NotNull(fechaFestivo);
+            Assert.Equal(new DateTime(2025, 5, 5), fechaFestivo.Fecha); // Lunes siguiente
+            Assert.Equal(DayOfWeek.Monday, fechaFestivo.Fecha.DayOfWeek);
+        }
+
+        [Fact]
+        public async Task EsFestivo_CuandoFechaNoCoincideConFestivo_DeberiaRetornarFalse()
+        {
+            // ARRANGE
+            int año = 2025;
+            var fechaNoFestiva = new DateTime(año, 2, 15); // No es festivo
+
+            var festivo = new Festivo
+            {
+                Nombre = "Año Nuevo",
+                Dia = 1,
+                Mes = 1,
+                IdTipo = 1,
+                DiasPascua = 0
+            };
+
+            FestivosRepositorioMock.Setup(repo => repo.ObtenerTodos()).ReturnsAsync(new[] { festivo });
+
+            // ACT
+            var esFestivo = await _service.EsFestivo(fechaNoFestiva);
+
+            // ASSERT
+            Assert.False(esFestivo);
+        }
+
+        [Fact]
+        public async Task EsFestivo_CuandoFechaCoincideConFestivo_DeberiaRetornarTrue()
+        {
+            // ARRANGE
+            int año = 2025;
+            var fechaFestiva = new DateTime(año, 1, 1); // Año nuevo
+
+            var festivo = new Festivo
+            {
+                Nombre = "Año Nuevo",
+                Dia = 1,
+                Mes = 1,
+                IdTipo = 1,
+                DiasPascua = 0
+            };
+
+            FestivosRepositorioMock.Setup(repo => repo.ObtenerTodos()).ReturnsAsync(new[] { festivo });
+
+            // ACT
+            var esFestivo = await _service.EsFestivo(fechaFestiva);
+
+            // ASSERT
+            Assert.True(esFestivo);
+        }
+
     }
 }
