@@ -27,8 +27,12 @@ pipeline {
         stage('Desplegar contenedor') {
             steps {
                 script {
-                    // Elimina contenedor previo si existe
+                    // Asegura que la red exista
+                    bat "docker network inspect %DOCKER_NETWORK% || docker network create %DOCKER_NETWORK%"
+
+                    // Elimina contenedor anterior si existe
                     bat "docker rm -f %CONTAINER_NAME% || exit 0"
+
                     // Ejecuta contenedor nuevo
                     bat "docker run -d --name %CONTAINER_NAME% --network %DOCKER_NETWORK% -p %HOST_PORT%:%APP_PORT% %DOCKER_IMAGE%"
                 }
