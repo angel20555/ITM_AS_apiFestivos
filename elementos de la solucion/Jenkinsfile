@@ -1,0 +1,47 @@
+﻿pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'bdfestivos_dockercompose-sqlserver:latest'
+        CONTAINER_NAME = 'dockerbdfestivos'
+        APP_PORT = '5235'
+        HOST_PORT = '7881'
+        DOCKER_NETWORK = 'dockerbdfestivos_red'
+    }
+
+    stages {
+        stage('Clonar') {
+            steps {
+                git url: 'https://github.com/angel20555/ITM_AS_apiFestivos', branch: 'main'
+            }
+        }
+
+        stage('Construir la imagen de Docker') {
+            steps {
+                script {
+                    bat "docker build -t %DOCKER_IMAGE% ."
+                }
+            }
+        }
+
+        stage('Desplegar contenedor') {
+            steps {
+                script {
+                    // Elimina contenedor previo si existe
+                    bat "docker rm -f %CONTAINER_NAME% || exit 0"
+                    // Ejecuta contenedor nuevo
+                    bat "docker run -d --name %CONTAINER_NAME% --network %DOCKER_NETWORK% -p %HOST_PORT%:%APP_PORT% %DOCKER_IMAGE%"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Despliegue exitoso.'
+        }
+        failure {
+            echo '❌ Falló el despliegue.'
+        }
+    }
+}
