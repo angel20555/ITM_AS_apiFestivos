@@ -9,7 +9,7 @@ EXPOSE 5235
 
 # Etapa de build con SDK de .NET
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /src/apiFestivos
 COPY . .
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app
