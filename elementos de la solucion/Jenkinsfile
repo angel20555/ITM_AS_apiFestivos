@@ -19,7 +19,7 @@ pipeline {
         stage('Construir la imagen de Docker') {
             steps {
                 script {
-                    bat 'docker build -t %DOCKER_IMAGE% -f "src/Dockerfile" "elementos de la solucion"'
+                    bat 'docker build -t %DOCKER_IMAGE% -f "Dockerfile"'
                 }
             }
         }
